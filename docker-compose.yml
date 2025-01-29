@@ -1,0 +1,48 @@
+#composeはテスト環境、本番環境などあらゆる換気用で動作する
+
+version: "3"
+
+services:
+  # Node.js
+  node:
+    build: .
+    container_name: node
+    tty: true
+    ports:
+      - 3000:3000
+    # プロジェクトディレクトリにマウントする
+    volumes:
+      - .:/var/www
+    # ネットワーク
+    networks:
+      - default
+
+  # データベース
+  db:
+    image: mysql:8.0 # バージョンを8.0に固定
+    container_name: mysql
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - db-data:/var/lib/mysql # 永続化用のボリュームを追加
+      - ./mysql/conf.d:/etc/mysql/conf.d
+      - ./mysql/init.d:/docker-entrypoint-initdb.d
+        # DB初期化ディレクトリにマウントする
+      # ホストの ./mysql/init.sql ファイルを、
+      #コンテナ内の /docker-entrypoint-initdb.d/init.sql としてマウントするという意味になる
+    networks:
+      - default
+
+volumes: # volumesセクションを追加
+  db-data:
+# ネットワーク
+networks:
+  default:
+    driver: bridge
