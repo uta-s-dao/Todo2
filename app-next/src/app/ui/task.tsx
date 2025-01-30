@@ -1,14 +1,28 @@
 "use client";
 import React, { useState } from "react";
 
-export default function Task() {
+import { Todos } from "../page";
+
+type TaskProps = {
+  todostatus: "Todo" | "Progress" | "Done";
+  todos: Todos[];
+};
+export default function Task({ todostatus, todos }: TaskProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
       {/* カード */}
       <div onClick={() => setIsOpen(true)} className=' justfy-center bg-white'>
-        <div className='m-4 text-2xl text-center font-semibold'>洗たく</div>
+        <div className='m-4 text-2xl text-center font-semibold'>
+          {todos
+            // todosは配列だからtodos.titleなどの表示ができない
+            // よってフィルタリングの後マッピングを行う
+            .filter((todo) => todo.todo_status === todostatus)
+            .map((todo) => (
+              <div key={todo.id}>{todo.title}</div>
+            ))}
+        </div>
       </div>
       {/* モーダル */}
       {isOpen && (

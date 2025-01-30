@@ -1,14 +1,29 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Task from "./ui/task";
+export type Todos = {
+  id: number;
+  title: string;
+  todo_status: string;
+};
+
 export default function Home() {
   const [isModal, setIsModal] = useState(false);
+  const [todos, setTodos] = useState<Todos[]>([]);
 
+  useEffect(() => {
+    async function showTodo() {
+      const response = await fetch("http://localhost:3000/api/todos");
+      const data: Todos[] = await response.json();
+      setTodos(data);
+    }
+    showTodo();
+  }, []);
   return (
     <>
       <div>
         <div className='grid grid-cols-3 gap-2 p-4 rounded-lg h-screen'>
-          <div className='p-4 rounded-md bg-slate-100 '>
+          <div className='p-4 rounded-md bg-slate-100'>
             <div className='font-weight text-5xl text-center rounded-lg p-1 bg-red-400'>
               Todo
             </div>
@@ -20,7 +35,18 @@ export default function Home() {
                 タスクの新規作成
               </button>
             </div>
-            <Task />
+            <Task todostatus='Todo' todos={todos} />
+            <ul>
+              {todos.map(
+                (todo) =>
+                  todo.todo_status === "Todo" && (
+                    <li key={todo.id}>
+                      <span>{todo.title}</span>
+                      <span>{todo.todo_status}</span>
+                    </li>
+                  )
+              )}
+            </ul>
           </div>
           <div className='p-4 rounded-md bg-slate-100'>
             <div className='font-weight text-5xl text-center rounded-lg p-1 bg-green-400'>
@@ -34,7 +60,18 @@ export default function Home() {
                 タスクの新規作成
               </button>
             </div>
-            <Task />
+            <Task todostatus='Progress' todos={todos} />
+            <ul>
+              {todos.map(
+                (todo) =>
+                  todo.todo_status === "Progress" && (
+                    <li key={todo.id}>
+                      <span>{todo.title}</span>
+                      <span>{todo.todo_status}</span>
+                    </li>
+                  )
+              )}
+            </ul>
           </div>
           <div className='p-4 rounded-md bg-slate-100'>
             <div className='font-weight text-5xl text-center rounded-lg p-1 bg-blue-400'>
@@ -48,7 +85,18 @@ export default function Home() {
                 タスクの新規作成
               </button>
             </div>
-            <Task />
+            <Task todostatus='Done' todos={todos} />
+            <ul>
+              {todos.map(
+                (todo) =>
+                  todo.todo_status === "Done" && (
+                    <li key={todo.id}>
+                      <span>{todo.title}</span>
+                      <span>{todo.todo_status}</span>
+                    </li>
+                  )
+              )}
+            </ul>
           </div>
         </div>
       </div>

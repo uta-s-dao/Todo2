@@ -7,6 +7,6 @@ CREATE TABLE todos (
 
 
 INSERT INTO todos (title, todo_status) VALUES
-  ('kintore', 'todo'),
-  ('study', 'progress'),
-  ('message', 'progress');
+  ('kintore', 'Todo'),
+  ('study', 'Progress'),
+  ('message', 'Done');

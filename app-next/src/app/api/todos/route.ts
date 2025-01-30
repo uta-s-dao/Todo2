@@ -1,3 +1,4 @@
+//route.tsはDB接続・操作を可能にする
 import { NextResponse } from "next/server";
 import * as mysql from "promise-mysql";
 import * as dotenv from "dotenv";
@@ -21,3 +22,6 @@ export async function GET() {
 
   return NextResponse.json(result);
 }
+export async function POST() {}
+export async function PUT() {}
+export async function PATCH() {}
