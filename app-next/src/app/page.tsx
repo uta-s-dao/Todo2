@@ -10,15 +10,52 @@ export type Todos = {
 export default function Home() {
   const [isModal, setIsModal] = useState(false);
   const [todos, setTodos] = useState<Todos[]>([]);
+  const [taskInput, setTaskInput] = useState("");
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTaskInput(e.target.value);
+  };
 
   useEffect(() => {
     async function showTodo() {
-      const response = await fetch("http://localhost:3000/api/todos");
+      //ブラウザ標準のAPIで、HTTPリクエストを送信するための関数
+      const response = await fetch("/api/todos");
+      // console.log(response);
       const data: Todos[] = await response.json();
+      // console.log(data);
       setTodos(data);
     }
     showTodo();
   }, []);
+  //  タスクの更新
+  const handleClick = async () => {
+    try {
+      const response: Response = await fetch("/api/todos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: taskInput, // stateの値を使用
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("タスクの追加に失敗しました");
+      }
+
+      const updatedResponse = await fetch("/api/todos");
+      const updatedData = await updatedResponse.json();
+      setTodos(updatedData);
+
+      console.log("タスクが追加されました");
+      setTaskInput(""); // 入力をクリア
+      setIsModal(false); // モーダルを閉じる
+    } catch (error: unknown) {
+      console.error("エラーが発生しました:", error);
+    }
+  };
+
   return (
     <>
       <div>
@@ -121,13 +158,21 @@ export default function Home() {
             </div>
 
             <div className='flex'>
+              {/* JSX で波括弧が必要なのは、HTML的な記法の中に JavaScript の式を埋め込む必要があるため */}
               <input
                 type='text'
                 placeholder='入力してください'
-                className='w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white text-gray-900 placeholder-gray-400'
+                value={taskInput}
+                onChange={handleInputChange}
+                className='w-full px-4 py-2 rounded-lg border border-gray-300 
+                focus:ring-2 focus:ring-blue-500  focus:border-blue-500 outline-none transition-all
+                 bg-white text-gray-900 placeholder-gray-400'
               />
 
-              <button className='bg-slate-700 text-white p-2 rounded-full ml-4'>
+              <button
+                onClick={handleClick}
+                className='bg-slate-700 text-white p-2 rounded-full ml-4'
+              >
                 タスクを追加
               </button>
             </div>
