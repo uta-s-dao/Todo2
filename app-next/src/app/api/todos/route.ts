@@ -23,12 +23,12 @@ export async function GET() {
   return NextResponse.json(result);
 }
 
-// 新しいTodoの作成
+// 作成
 //requestにはリクエストボディ（タイトルを含むjson）、HTTPヘッダー、
 // メソッドタブ、URLパラメーターなどが含まれます
 export async function POST(request: Request) {
   //request.json()はリクエストボディ中のjsonデータだけを取り出す
-  const { title } = await request.json();
+  const { title, todo_status } = await request.json();
   const connection = await mysql.createConnection({
     host: "db",
     port: 3306,
@@ -39,30 +39,17 @@ export async function POST(request: Request) {
   //?は値が入る場所を示すマーカ
   //例えば２つの値を扱う場合は
   // INSERT INTO todos (title, due_date) VALUES (?, ?)", ["買い物", "2024-02-01"]
-  await connection.query("INSERT INTO todos (title) VALUES (?)", [title]);
+  await connection.query("INSERT INTO todos (title,todo_status) VALUES (?,?)", [
+    title,
+    todo_status,
+  ]);
   connection.end();
   return NextResponse.json({ message: "Created" }, { status: 201 });
 }
 
-// Todoの更新（完了状態の切り替えなど）
-export async function PUT(request: Request) {
-  const { id, completed } = await request.json();
-  const connection = await mysql.createConnection({
-    host: "db",
-    port: 3306,
-    database: process.env.MYSQL_DATABASE,
-    user: process.env.MYSQL_USER,
-    password: process.env.MYSQL_PASSWORD,
-  });
-  await connection.query("UPDATE todos SET completed = ? WHERE id = ?", [
-    completed,
-    id,
-  ]);
-  connection.end();
-  return NextResponse.json({ message: "Updated" });
-}
 
-// Todoの削除
+
+// 削除
 export async function DELETE(request: Request) {
   const { id } = await request.json();
   const connection = await mysql.createConnection({

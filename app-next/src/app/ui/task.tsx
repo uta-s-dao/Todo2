@@ -6,8 +6,17 @@ import { Todos } from "../page";
 type TaskProps = {
   todostatus: "Todo" | "Progress" | "Done";
   todos: Todos[];
+  setStatusInput: (status: string) => void;
+  onUpdateStatus: (id: number, newStatus: string) => Promise<void>;
+  onDeleteTask: (id: number) => Promise<void>;
 };
-export default function Task({ todostatus, todos }: TaskProps) {
+export default function Task({
+  todostatus,
+  todos,
+  setStatusInput,
+  onUpdateStatus,
+  onDeleteTask,
+}: TaskProps) {
   const [isOpen, setIsOpen] = useState(false);
   // 型をTodosに合わせた空オブジェクトを初期値として設定
   const [selectedTodo, setSelectedTodo] = useState<Todos>({
@@ -15,6 +24,26 @@ export default function Task({ todostatus, todos }: TaskProps) {
     title: "",
     todo_status: "",
   });
+  // ステータス更新を処理する関数
+  const handleStatusChange = async (newStatus: string) => {
+    if (selectedTodo) {
+      //もし、selectedTodoの型定義が正しいならば下に進める
+
+      await onUpdateStatus(selectedTodo.id, newStatus);
+      // 親コンポーネントのstatusInputを更新
+      setStatusInput(newStatus);
+      // モーダルを閉じる
+      setIsOpen(false);
+    }
+  };
+  //消去する関数
+  const handleDelete = async () => {
+    if (selectedTodo) {
+      await onDeleteTask(selectedTodo.id);
+      setIsOpen(false); // モーダルを閉じる
+    }
+  };
+
   return (
     <>
       {/* カード */}
@@ -49,12 +78,9 @@ export default function Task({ todostatus, todos }: TaskProps) {
                     </h2>
 
                     <button
-                      className='bg-slate-500 text-white p-2 my-1 ml-10 rounded-md 
-              '
+                      onClick={handleDelete}
+                      className='bg-slate-500 text-white p-2 m-1 rounded-md ml-auto'
                     >
-                      更新
-                    </button>
-                    <button className='bg-slate-500 text-white p-2 m-1 rounded-md'>
                       消去
                     </button>
                     {/* ml-autoは左側のマージンを自動的に最大にして、要素を右側に押し出す事ができる */}
@@ -66,13 +92,22 @@ export default function Task({ todostatus, todos }: TaskProps) {
                     </button>
                   </div>
                   <div className='grid grid-cols-3'>
-                    <button className='bg-red-400 rounded-full p-3 mx-2'>
+                    <button
+                      onClick={() => handleStatusChange("Todo")}
+                      className='bg-red-400 rounded-full p-3 mx-2'
+                    >
                       Todoへ
                     </button>
-                    <button className='bg-green-400 rounded-full p-3 mx-2'>
+                    <button
+                      onClick={() => handleStatusChange("Progress")}
+                      className='bg-green-400 rounded-full p-3 mx-2'
+                    >
                       Progressへ
                     </button>
-                    <button className='bg-blue-400 rounded-full p-3 mx-2'>
+                    <button
+                      onClick={() => handleStatusChange("Done")}
+                      className='bg-blue-400 rounded-full p-3 mx-2'
+                    >
                       Doneへ
                     </button>
                   </div>

@@ -11,6 +11,7 @@ export default function Home() {
   const [isModal, setIsModal] = useState(false);
   const [todos, setTodos] = useState<Todos[]>([]);
   const [taskInput, setTaskInput] = useState("");
+  const [statusInput, setStatusInput] = useState("");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTaskInput(e.target.value);
@@ -27,7 +28,7 @@ export default function Home() {
     }
     showTodo();
   }, []);
-  //  タスクの更新
+  //  POST
   const handleClick = async () => {
     try {
       const response: Response = await fetch("/api/todos", {
@@ -36,7 +37,8 @@ export default function Home() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          title: taskInput, // stateの値を使用
+          title: taskInput,
+          todo_status: statusInput, // stateの値を使用
         }),
       });
 
@@ -56,6 +58,55 @@ export default function Home() {
     }
   };
 
+  //PUT
+  const updateTaskStatus = async (id: number, newStatus: string) => {
+    try {
+      //${id}の部分でデータベース中のAUTO_INCREMENTであるidと一致させている
+      //それをAPIリクエストとして送信し
+      const response = await fetch(`/api/todos/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          todo_status: newStatus,
+        }),
+      });
+      console.log("Update response:", await response.json());
+      if (!response.ok) {
+        throw new Error("タスクの更新に失敗しました");
+      }
+
+      // データを再取得して状態を更新
+      const updatedResponse = await fetch("/api/todos");
+      const updatedData = await updatedResponse.json();
+      console.log("Updated todos:", updatedData); // 新しいデータを確認
+      setTodos(updatedData);
+    } catch (error) {
+      console.error("エラーが発生しました:", error);
+    }
+  };
+
+  //DELETE
+  const deleteTask = async (id: number) => {
+    try {
+      const response = await fetch(`/api/todos/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("タスクの削除に失敗しました");
+      }
+
+      // データを再取得して状態を更新
+      const updatedResponse = await fetch("/api/todos");
+      const updatedData = await updatedResponse.json();
+      setTodos(updatedData);
+    } catch (error) {
+      console.error("エラーが発生しました:", error);
+    }
+  };
+
   return (
     <>
       <div>
@@ -66,24 +117,22 @@ export default function Home() {
             </div>
             <div className='flex justify-center'>
               <button
-                onClick={() => setIsModal(true)}
+                onClick={() => {
+                  setIsModal(true);
+                  setStatusInput("Todo");
+                }}
                 className='text-center mt-6 bg-slate-600 hover:bg-black text-white rounded-full m-3 p-2'
               >
-                タスクの新規作成
+                タスクを追加
               </button>
             </div>
-            <Task todostatus='Todo' todos={todos} />
-            <ul>
-              {todos.map(
-                (todo) =>
-                  todo.todo_status === "Todo" && (
-                    <li key={todo.id}>
-                      <span>{todo.title}</span>
-                      <span>{todo.todo_status}</span>
-                    </li>
-                  )
-              )}
-            </ul>
+            <Task
+              todostatus='Todo'
+              todos={todos}
+              setStatusInput={setStatusInput}
+              onUpdateStatus={updateTaskStatus}
+              onDeleteTask={deleteTask} 
+            />
           </div>
           <div className='p-4 rounded-md bg-slate-100'>
             <div className='font-weight text-5xl text-center rounded-lg p-1 bg-green-400'>
@@ -91,24 +140,22 @@ export default function Home() {
             </div>
             <div className='flex justify-center'>
               <button
-                onClick={() => setIsModal(true)}
+                onClick={() => {
+                  setIsModal(true);
+                  setStatusInput("Progress");
+                }}
                 className='text-center mt-6   bg-slate-600 hover:bg-black text-white rounded-full m-3 p-2'
               >
-                タスクの新規作成
+                タスクを追加
               </button>
             </div>
-            <Task todostatus='Progress' todos={todos} />
-            <ul>
-              {todos.map(
-                (todo) =>
-                  todo.todo_status === "Progress" && (
-                    <li key={todo.id}>
-                      <span>{todo.title}</span>
-                      <span>{todo.todo_status}</span>
-                    </li>
-                  )
-              )}
-            </ul>
+            <Task
+              todostatus='Progress'
+              todos={todos}
+              setStatusInput={setStatusInput}
+              onUpdateStatus={updateTaskStatus}
+              onDeleteTask={deleteTask} 
+            />
           </div>
           <div className='p-4 rounded-md bg-slate-100'>
             <div className='font-weight text-5xl text-center rounded-lg p-1 bg-blue-400'>
@@ -116,24 +163,22 @@ export default function Home() {
             </div>
             <div className='flex justify-center'>
               <button
-                onClick={() => setIsModal(true)}
+                onClick={() => {
+                  setIsModal(true);
+                  setStatusInput("Done");
+                }}
                 className='text-center mt-6   bg-slate-600 hover:bg-black text-white rounded-full m-3 p-2'
               >
-                タスクの新規作成
+                タスクを追加
               </button>
             </div>
-            <Task todostatus='Done' todos={todos} />
-            <ul>
-              {todos.map(
-                (todo) =>
-                  todo.todo_status === "Done" && (
-                    <li key={todo.id}>
-                      <span>{todo.title}</span>
-                      <span>{todo.todo_status}</span>
-                    </li>
-                  )
-              )}
-            </ul>
+            <Task
+              todostatus='Done'
+              todos={todos}
+              setStatusInput={setStatusInput}
+              onUpdateStatus={updateTaskStatus}
+              onDeleteTask={deleteTask} 
+            />
           </div>
         </div>
       </div>
@@ -159,6 +204,8 @@ export default function Home() {
 
             <div className='flex'>
               {/* JSX で波括弧が必要なのは、HTML的な記法の中に JavaScript の式を埋め込む必要があるため */}
+              {/* データベースのtodo_statuはNOT NULLとしていたのでこのインプットから送られる情報は
+              todo_statusを含むようにしなければならない */}
               <input
                 type='text'
                 placeholder='入力してください'
