@@ -37,7 +37,7 @@
 1. `docker compose up` を実行し、イメージを取得
 2. `docker start node mysql` を実行し、コンテナを起動
 3. `docker exec -it node /bin/bash` を実行し、node コンテナに接続
-4. node コンテナ内で `app-next` ディレクトリに移動し、`npm run dev` を実行
+4. node コンテナ内で `app-next` ディレクトリに移動し、`npm install`を実行した後に`npm run dev` を実行
 
 ## 参考資料
 
