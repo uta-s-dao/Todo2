@@ -43,7 +43,9 @@
 
 
 
-Uploading Create Next App - Google Chrome 2025-02-05 17-07-23.mp4…
+https://github.com/user-attachments/assets/32139b67-530f-44bb-8ca6-a1ea987686ae
+
+
 
 
 
